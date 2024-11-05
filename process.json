@@ -1,0 +1,14 @@
+{
+    "name": "Test",
+    "nodes": [
+      {"id": "1", "assigned": {"label": "assistant", "customName": "assistant", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to form a clear description of the given question."}}, "llm": {"selected": "OLLAMA"}},
+      {"id": "2", "assigned": {"label": "negative-expert", "customName": "negative-expert", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to give few reasons why not to invest to the given asset."}}, "llm": {"selected": "OLLAMA"}},
+      {"id": "3", "assigned": {"label": "analyst", "customName": "analyst", "customType": "RAG", "customConfig": {"system_prompt": "Your job is to analyze the final answer based on the given arguments and context.", "sources": [{"source": "C:/Users/amiri/Documents/projektit/aalto/special/agents-back/documents/text/dummy.txt", "type": "text_file"}, {"source": "https://research-api.cbs.dk/ws/portalfiles/portal/59784604/439940_Masterthesis_OnurOezek.pdf", "type": "pdf_file"}, {"source": "https://www.investopedia.com/tech/question-why-should-anyone-invest-crypto/", "type": "web_page"}, {"source": "Investing is good as long one diversifies investment targets", "type": "text"}]}}, "llm": {"selected": "GPT"}},
+      {"id": "4", "assigned": {"label": "positive-expert", "customName": "positive-expert", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to give few reasons why one should invest to the given asset."}}, "llm": {"selected": "GPT"}}
+    ],
+    "edges": [
+      {"source": "1", "target": ["2", "4"], "id": "xy-edge__1-2-4"},
+      {"source": "2", "target": ["3"], "id": "xy-edge__2-3"},
+      {"source": "4", "target": ["3"], "id": "xy-edge__4-3"}
+    ]
+  }
