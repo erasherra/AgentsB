@@ -1,33 +1,83 @@
+from typing import Union
+
+from fastapi import WebSocket, Request, FastAPI
+import json
+from project.utils.input_validator import validate_process_json
+from project.utils.input_validator import validate_node
+from project.process.multi_agent_system import MultiAgentSystem
+
+app = FastAPI()
+
+ms = None
+local_setup_json = None
+
+@app.get("/")
+def read_root():
+    return {"Hello": "World123"}
 
 
-#Nodes 
-[{"id":"1","type":"customNode","data":{"assigned":{"label":"asd","customName":"asd","customType":"AGENT","customConfig":{"system_prompt":"asd"}},"functions":{},"llm":{"selected":"OLLAMA"}},"position":{"x":319,"y":122},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
-{"id":"2","type":"customNode","data":{"assigned":{"label":"asd2","customName":"asd2","customType":"AGENT","customConfig":{"system_prompt":"asd2"}},"functions":{},"llm":{"selected":"OLLAMA"}},"position":{"x":599,"y":52},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
-{"id":"3","type":"customNode","data":{"assigned":{"label":"asd3","customName":"asd3","customType":"RAG","customConfig":{"system_prompt":"asd3","sources":[{"source":"asd","type":"TXT"},{"source":"asd","type":"PDF"},{"source":"asd","type":"URL"},{"source":"","type":"TXT"}]}},"functions":{},"llm":{"selected":"GPT"}},"position":{"x":891,"y":119},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
-{"id":"4","type":"customNode","data":{"assigned":{"label":"asd2.5","customName":"asd2.5","customType":"AGENT","customConfig":{"system_prompt":"asd2.5"}},"functions":{},"llm":{"selected":"GPT"}},"position":{"x":600,"y":178},"measured":{"width":200,"height":50},"selected":true,"dragging":false}]
+@app.get("/items/{item_id}")
+def read_item(item_id: int, q: Union[str, None] = None):
+    return {"item_id": item_id, "q": q}
 
-#Edges 
-[{"source":"1","target":"2","id":"xy-edge__1-2"},
-{"source":"2","target":"3","id":"xy-edge__2-3"},
-{"source":"1","target":"4","id":"xy-edge__1-4"},
-{"source":"4","target":"3","id":"xy-edge__4-3"}]
 
-{
-  "name": "Test",
-  "nodes": [
-    {"id": "1", "assigned": {"label": "asd", "customName": "asd", "customType": "AGENT", "customConfig": {"system_prompt": "asd"}}, "llm": {"selected": "OLLAMA"}},
-    {"id": "2", "assigned": {"label": "asd2", "customName": "asd2", "customType": "AGENT", "customConfig": {"system_prompt": "asd2"}}, "llm": {"selected": "OLLAMA"}},
-    {"id": "3", "assigned": {"label": "asd3", "customName": "asd3", "customType": "RAG", "customConfig": {"system_prompt": "asd3", "sources": [{"source": "asd", "type": "TXT"}, {"source": "asd", "type": "PDF"}, {"source": "asd", "type": "URL"}, {"source": "", "type": "TXT"}]}}, "llm": {"selected": "GPT"}},
-    {"id": "4", "assigned": {"label": "asd2.5", "customName": "asd2.5", "customType": "AGENT", "customConfig": {"system_prompt": "asd2.5"}}, "llm": {"selected": "GPT"}}
-  ],
-  "edges": [
-    {"source": "1", "target": "2", "id": "xy-edge__1-2"},
-    {"source": "2", "target": "3", "id": "xy-edge__2-3"},
-    {"source": "1", "target": "4", "id": "xy-edge__1-4"},
-    {"source": "4", "target": "3", "id": "xy-edge__4-3"}
-  ]
-}
+@app.post("/local_init")
+async def init_multi_agent_system(request: Request) -> None:
+    respnse = initialize_setup()
+    return respnse
+
+@app.post("/init")
+async def init_multi_agent_system(request: Request) -> None:
+
+    data = request.json()
+    if not validate_process_json(data):
+        return {"message": "Invalid *.json file."}
+    ms = MultiAgentSystem(data, model_manager=None)
+    return {"message": "Multi-agent system initialized successfully"}
+
+
+@app.post("/process")
+def process_input(input_data: dict) -> tuple:
+    if ms is None:
+        initialize_setup()
+    input_data, memory = ms.process_input(input_data)
+    return {"input_data": input_data, "memory": memory}
+
+
+@app.put("/modify/{node_id}")
+def modify_agent(node_id: str, node_data: dict) -> None:
+    if ms is None:
+        initialize_setup()
+    if not validate_node(node_data):
+        return {"message": "Invalid node data."}
+    ms.modify_agent(node_id, node_data)
+    return {"message": "Agent modified successfully"}
+
+
+@app.get("/models")
+def get_models():
+    return {"Hello": "TODO"}
+
+
+@app.websocket("/ws")
+async def websocket_endpoint(websocket: WebSocket):
+    await websocket.accept()
+    while True:
+        input_data = await websocket.receive_text()
+        await websocket.send_text(f"Message text was: {data}")
+
+
+
+def initialize_setup():
+    
+    with open("process.json", 'r') as f:
+        local_setup_json = json.load(f)
+    if not validate_process_json(local_setup_json):
+        return {"message": "Invalid node data."}
+    ms = MultiAgentSystem(local_setup_json, model_manager=None)
+    return {"message": "Multi-agent system initialized successfully"}
 
 if __name__ == "__main__":
-    print("Hello, world!")
+    initialize_setup()
+    print("Running...")
     # Add more code here if desired

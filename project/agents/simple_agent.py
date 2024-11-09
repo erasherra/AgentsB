@@ -13,4 +13,10 @@ class LLMAgent:
         #return input_data + " <start> " +  self.id + self.custom_type + " </end> "# output
         
         answer = self.llm.send(input_data, self.system_prompt)
-        return answer
+
+        response = f"""
+        {self.label}
+
+        {answer}
+        """
+        return response

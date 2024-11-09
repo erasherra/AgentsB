@@ -1,4 +1,3 @@
-# main.py (2-4)
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_ollama.llms import OllamaLLM
 
@@ -25,8 +24,10 @@ class Ollama:
         response = chain.invoke({"question": prompt})
         
         
+        if response is not None:
+            return response
         
-        return response
+        return ""
     
     def get_api_key(self):
         return self.api_key

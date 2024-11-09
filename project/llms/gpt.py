@@ -34,9 +34,10 @@ class GPT:
         chain = prompt_template | model
         response = chain.invoke({"question": prompt})
         
+        if response is not None and response.content is not None:
+            return response.content
         
-        
-        return response
+        return ""
     
     def get_api_key(self):
         return self.api_key
