@@ -1,12 +1,27 @@
 from typing import Union
 
 from fastapi import WebSocket, Request, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import json
 from project.utils.input_validator import validate_process_json
 from project.utils.input_validator import validate_node
 from project.process.multi_agent_system import MultiAgentSystem
+from project.llms.model_manager import ModelManager
 
 app = FastAPI()
+
+origins = [
+    "http://localhost",
+    "http://localhost:3000"
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 ms = None
 local_setup_json = None
@@ -20,23 +35,26 @@ def read_root():
 def read_item(item_id: int, q: Union[str, None] = None):
     return {"item_id": item_id, "q": q}
 
-
+# In work
 @app.post("/local_init")
 async def init_multi_agent_system(request: Request) -> None:
     respnse = initialize_setup()
     return respnse
 
+# In work
 @app.post("/init")
 async def init_multi_agent_system(request: Request) -> None:
 
-    data = request.json()
+    print("/init POST", request)
+    data = await request.json()
+    
     if not validate_process_json(data):
         return {"message": "Invalid *.json file."}
     ms = MultiAgentSystem(data, model_manager=None)
     return {"message": "Multi-agent system initialized successfully"}
 
-
-@app.post("/process")
+# In work
+@app.api_route("/process", methods=['POST', 'OPTIONS'])
 def process_input(input_data: dict) -> tuple:
     if ms is None:
         initialize_setup()
@@ -53,12 +71,12 @@ def modify_agent(node_id: str, node_data: dict) -> None:
     ms.modify_agent(node_id, node_data)
     return {"message": "Agent modified successfully"}
 
-
+# In work
 @app.get("/models")
 def get_models():
     return {"Hello": "TODO"}
 
-
+# In work
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()

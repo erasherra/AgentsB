@@ -1,3 +1,6 @@
+from project.llms.model_manager import ModelManager
+from project.agents.simple_agent import LLMAgent
+from project.agents.rag_agent import RAGAgent
 """
 Represents a multi-agent system. This class is responsible for initializing
 the agents and processing input data.
