@@ -44,6 +44,8 @@ class MultiAgentSystem:
                    for edge in self.setup["edges"]]
         ## TODO: delete memory
         memory = input_data
+        print(memory)
+        print(type(memory))
         while node_queue:
             # Dequeue a node and its path, check if it has been visited before
             node_id, path = node_queue.pop(0)
@@ -53,13 +55,15 @@ class MultiAgentSystem:
                 # Get the agent assigned to this node and process the input data with it
                 agent = next(a for a in self.agents if a.id == node_id)
                 input_data = agent.process_input(memory)
-                print(input_data)
-                #print(type(input_data))
-                memory += f""" 
+                input_data = f""" 
                 
                 {input_data} 
                 
                 """
+                print(input_data)
+                print(type(input_data))
+                print(type(memory))
+                memory += input_data
                 # Find all connected agents of this node that haven't been visited yet
                 connected_agents = self.get_connected_agents(node_id)
                 for target_node_id in connected_agents:

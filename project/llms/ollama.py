@@ -3,6 +3,8 @@ from langchain_ollama.llms import OllamaLLM
 
 class Ollama:
     def __init__(self, api_key="empty", model="llama3:8b-instruct-q4_0"):
+        if not api_key:
+            api_key="empty"
         self.api_key = api_key  # Replace this with your actual API key
         self.model = model
 
@@ -23,7 +25,8 @@ class Ollama:
         chain = prompt_template | model
         response = chain.invoke({"question": prompt})
         
-        
+        print(response)
+        print(type(response))
         if response is not None:
             return response
         

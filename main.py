@@ -3,10 +3,14 @@ from typing import Union
 from fastapi import WebSocket, Request, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import json
+
+from config import models
 from project.utils.input_validator import validate_process_json
 from project.utils.input_validator import validate_node
 from project.process.multi_agent_system import MultiAgentSystem
 from project.llms.model_manager import ModelManager
+from project.llms.gpt import GPT
+from project.llms.ollama import Ollama
 
 app = FastAPI()
 
@@ -23,8 +27,32 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-ms = None
+model_manager = None
+MAS = None
 local_setup_json = None
+
+def initialize_model_manager():
+    global model_manager
+    model_manager = ModelManager()
+    
+    for model in models:
+        if model["name"] == "OLLAMA":
+            model_manager.add_model("OLLAMA", Ollama(api_key="", model=model["model"]))
+        elif model["name"] == "OpenAI":
+            model_manager.add_model("GPT", GPT(api_key=model["api_key"], model=model["model"]))
+    
+def initialize_setup():
+    
+    initialize_model_manager()
+    
+    with open("process.json", 'r') as f:
+        local_setup_json = json.load(f)
+    if not validate_process_json(local_setup_json):
+        return {"message": "Invalid node data."}
+    global MAS
+    MAS = MultiAgentSystem(local_setup_json, model_manager=model_manager)
+    return {"message": "Multi-agent system initialized successfully"}
+
 
 @app.get("/")
 def read_root():
@@ -46,29 +74,33 @@ async def init_multi_agent_system(request: Request) -> None:
 async def init_multi_agent_system(request: Request) -> None:
 
     print("/init POST", request)
+    initialize_model_manager()
     data = await request.json()
     
     if not validate_process_json(data):
         return {"message": "Invalid *.json file."}
-    ms = MultiAgentSystem(data, model_manager=None)
+    global MAS 
+    MAS = MultiAgentSystem(data, model_manager=model_manager)
     return {"message": "Multi-agent system initialized successfully"}
 
 # In work
-@app.api_route("/process", methods=['POST', 'OPTIONS'])
-def process_input(input_data: dict) -> tuple:
-    if ms is None:
-        initialize_setup()
-    input_data, memory = ms.process_input(input_data)
+@app.post("/process")
+async def process_input(request: Request) -> None:
+    data = await request.json()
+    query = data["query"]
+    #if MAS is None:
+    #    initialize_setup()
+    input_data, memory = MAS.process_input(query)
     return {"input_data": input_data, "memory": memory}
 
 
 @app.put("/modify/{node_id}")
 def modify_agent(node_id: str, node_data: dict) -> None:
-    if ms is None:
+    if MAS is None:
         initialize_setup()
     if not validate_node(node_data):
         return {"message": "Invalid node data."}
-    ms.modify_agent(node_id, node_data)
+    MAS.modify_agent(node_id, node_data)
     return {"message": "Agent modified successfully"}
 
 # In work
@@ -84,16 +116,9 @@ async def websocket_endpoint(websocket: WebSocket):
         input_data = await websocket.receive_text()
         await websocket.send_text(f"Message text was: {data}")
 
+  
 
 
-def initialize_setup():
-    
-    with open("process.json", 'r') as f:
-        local_setup_json = json.load(f)
-    if not validate_process_json(local_setup_json):
-        return {"message": "Invalid node data."}
-    ms = MultiAgentSystem(local_setup_json, model_manager=None)
-    return {"message": "Multi-agent system initialized successfully"}
 
 if __name__ == "__main__":
     initialize_setup()
