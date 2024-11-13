@@ -18,7 +18,11 @@ class Ollama:
             raise ValueError("No API key provided")
 
         #TODO: Think some option to inject the question to location to system prompt
-        template = system_prompt + """{question}"""
+        template = system_prompt + """
+        
+        {question}
+        
+        """
         
         prompt_template = ChatPromptTemplate.from_template(template)
         model = OllamaLLM(model=self.model)

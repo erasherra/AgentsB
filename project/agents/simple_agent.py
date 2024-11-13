@@ -15,7 +15,7 @@ class LLMAgent:
         answer = self.llm.send(input_data, self.system_prompt)
 
         response = f"""
-        {self.label}
+        # {self.label}:
 
         {answer}
         """

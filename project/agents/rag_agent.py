@@ -31,7 +31,7 @@ class RAGAgent:
         answer, sources = self.bot.query(input_data, citations=True)
         if answer is not None:
             response = f"""
-            {self.label}
+            # {self.label}:
 
             {answer}
             """
