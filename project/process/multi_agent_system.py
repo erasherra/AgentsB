@@ -19,10 +19,14 @@ class MultiAgentSystem:
         :param agent_setup: The path to the JSON file containing the agent
                              setup. Default is "process.json"
         """
+        
         self.setup = agent_setup
         if model_manager is None:
             model_manager = ModelManager()
 
+        #TODO
+        debug_mode = False
+        
         self.agents = []
         for node in self.setup["nodes"]:
             if node["assigned"]["customType"] == "AGENT":
@@ -44,8 +48,19 @@ class MultiAgentSystem:
                    for edge in self.setup["edges"]]
         ## TODO: delete memory
         memory = input_data
-        print(memory)
-        print(type(memory))
+        print("Input: ", memory)
+        
+        # Check if the node_queue queue is empty and if it is empty then go through self.agents and run agent process_input
+        if not node_queue:
+            for agent in self.agents:
+                temp_input = agent.process_input(input_data)
+                memory += f""" 
+                
+                {temp_input} 
+                
+                """
+            return input_data, memory
+        
         while node_queue:
             # Dequeue a node and its path, check if it has been visited before
             node_id, path = node_queue.pop(0)
@@ -60,9 +75,7 @@ class MultiAgentSystem:
                 {input_data} 
                 
                 """
-                print(input_data)
-                print(type(input_data))
-                print(type(memory))
+                print("New Input: ", input_data)
                 memory += input_data
                 # Find all connected agents of this node that haven't been visited yet
                 connected_agents = self.get_connected_agents(node_id)
@@ -75,6 +88,55 @@ class MultiAgentSystem:
                                 node_queue.append((edge["target"][0], path + [next(n for n in self.setup["nodes"] if n["id"] == edge["target"][0])]))
 
         return input_data, memory
+
+    # Streaming
+    async def process_input_stream(self, input_data, websocket):
+        # Initialize a set to keep track of visited nodes and an empty queue for nodes to be processed
+        visited = set()
+        node_queue = [(edge["source"], [next(n for n in self.setup["nodes"] if n["id"] == edge["source"])])
+                   for edge in self.setup["edges"]]
+        ## TODO: delete memory
+        memory = input_data
+        print("Input: ", memory)
+        
+        # Check if the node_queue queue is empty and if it is empty then go through self.agents and run agent process_input
+        if not node_queue:
+            for agent in self.agents:
+                temp_input = await agent.process_stream(input_data, websocket)
+                memory += f""" 
+                
+                {temp_input} 
+                
+                """
+            return input_data, memory
+        
+        while node_queue:
+            # Dequeue a node and its path, check if it has been visited before
+            node_id, path = node_queue.pop(0)
+            if node_id not in visited:
+                visited.add(node_id)
+
+                # Get the agent assigned to this node and process the input data with it
+                agent = next(a for a in self.agents if a.id == node_id)
+                input_data = await agent.process_stream(memory, websocket)
+                input_data = f""" 
+                
+                {input_data} 
+                
+                """
+                print("New Input: ", input_data)
+                memory += input_data
+                # Find all connected agents of this node that haven't been visited yet
+                connected_agents = self.get_connected_agents(node_id)
+                for target_node_id in connected_agents:
+                    if target_node_id not in visited:
+                        # For each connected agent, find the edges that connect it to other nodes,
+                        # and add them to the queue for further processing
+                        for edge in self.setup["edges"]:
+                            if edge["source"] == node_id and target_node_id in edge["target"]:
+                                node_queue.append((edge["target"][0], path + [next(n for n in self.setup["nodes"] if n["id"] == edge["target"][0])]))
+
+        return input_data, memory        
 
     # This method returns a list of node IDs that are directly connected to the given node.
     # It iterates over all edges in the system and checks if the given node is either

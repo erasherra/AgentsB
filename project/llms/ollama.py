@@ -36,6 +36,38 @@ class Ollama:
         
         return ""
     
+    async def stream(self, 
+             prompt, 
+             system_prompt="""Let's think step by step. 
+             
+             Question: """,
+             websocket=None):
+        
+        if not self.api_key:
+            raise ValueError("No API key provided")
+
+        #TODO: Think some option to inject the question to location to system prompt
+        template = system_prompt + """
+        
+        {question}
+        
+        """
+        
+        prompt_template = ChatPromptTemplate.from_template(template)
+        model = OllamaLLM(model=self.model)
+        chain = prompt_template | model
+        
+        response = ""
+        for chunk in chain.stream({"question": prompt}):
+            print(chunk, end="|", flush=True)
+            await websocket.send_text(chunk)
+            response += chunk
+
+        if response is not None:
+            return response
+        
+        return ""
+    
     def get_api_key(self):
         return self.api_key
     

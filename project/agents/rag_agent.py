@@ -12,7 +12,8 @@ class RAGAgent:
         self.system_prompt = self.custom_config["system_prompt"]
         self.llm = model_manager.get_model(node["llm"]["selected"])
 
-        self.embedchain_config = model_manager.select_rag_config(self.llm.get_model_type(), self.llm.get_model(), self.system_prompt, self.llm.get_api_key())
+
+        self.embedchain_config = model_manager.select_rag_config(self.llm.get_model_type(), self.llm.get_model(), self.system_prompt, self.llm.get_api_key(), stream)
         
             
         bot = App.from_config(config=self.embedchain_config)
@@ -23,10 +24,8 @@ class RAGAgent:
 
         self.bot = bot
         
-    def process_input(self, input_data):
-        # TO DO: implement RAG agent logic
-        # For now, just return the input data as is
-        #return input_data + " <start> " +  self.id + self.custom_type + " </end> "# output
+   
+    def process(self, input_data):
         
         answer, sources = self.bot.query(input_data, citations=True)
         if answer is not None:
@@ -38,4 +37,26 @@ class RAGAgent:
             return response
         
         return ""
+    
+    async def process_stream(self, input_data, websocket=None):
+        
+        if websocket:
+            answer, sources = await self.bot.query(input_data, citations=True)
+            if answer is not None:
+                response = f"""
+                # {self.label}:
+
+                {answer}
+                """
+                return response
+        
+        return ""
+    
+    def process_input(self, input_data):
+        # TO DO: implement RAG agent logic
+        # For now, just return the input data as is
+        #return input_data + " <start> " +  self.id + self.custom_type + " </end> "# output
+        
+        
+        return self.process(input_data)
     

@@ -10,7 +10,7 @@ class ModelManager:
     def get_model(self, model_type):
         return self.models.get(model_type)
 
-    def select_rag_config(self, model_type, model, system_prompt, api_key=None):
+    def select_rag_config(self, model_type, model, system_prompt, api_key=None, stream=False):
         
         llm_config = None
         if model_type == "OLLAMA":
@@ -20,7 +20,7 @@ class ModelManager:
                   "config": {
                     "model": model,
                     "top_p": 0.5,
-                    "stream": False,
+                    "stream": stream,
                     "prompt": "\n$context\n\n$query\n\n",
                     "system_prompt": system_prompt
                   }
@@ -35,7 +35,7 @@ class ModelManager:
                       "temperature": 0.5,
                       "max_tokens": 1000,
                       "top_p": 1,
-                      "stream": False,
+                      "stream": stream,
                       "prompt": "\n$context\n\n$query\n\n",
                       "system_prompt": system_prompt,
                       "api_key": api_key

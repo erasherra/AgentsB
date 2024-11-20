@@ -32,11 +32,11 @@ def validate_process_json(process_json):
 
     edges = process_json["edges"]
 
-    for i, edge in enumerate(edges):
-        # Check if each edge has required keys
-        if "source" not in edge or "target" not in edge:
-            print(f"Error: Edge {i} does not have required keys at path {edge}.")
-            return False
+    #for i, edge in enumerate(edges):
+    #    # Check if each edge has required keys
+    #    if "source" not in edge or "target" not in edge:
+    #        print(f"Error: Edge {i} does not have required keys at path {edge}.")
+    #        return False
 
     return True
 

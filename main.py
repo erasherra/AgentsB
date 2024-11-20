@@ -106,18 +106,18 @@ def modify_agent(node_id: str, node_data: dict) -> None:
 # In work
 @app.get("/models")
 def get_models():
-    return {"Hello": "TODO"}
+    return {"models": models}
 
 # In work
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
+    
     while True:
         input_data = await websocket.receive_text()
-        await websocket.send_text(f"Message text was: {data}")
-
-  
-
+        print("ASD ", input_data)
+        await MAS.process_input_stream(input_data, websocket)
+        #await websocket.send_text(f"Message text was: {data}")
 
 
 if __name__ == "__main__":
