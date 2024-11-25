@@ -14,7 +14,7 @@ class LLMAgent:
         answer = self.llm.send(input_data, self.system_prompt)
 
         response = f"""
-        # {self.label}:
+        #{self.label}:
 
         {answer}
         """
@@ -24,7 +24,7 @@ class LLMAgent:
     async def process_stream(self, input_data, websocket=None):
         
         if websocket:
-            return await self.llm.stream(input_data, self.system_prompt, websocket)
+            return await self.llm.stream(self.label, input_data, self.system_prompt, websocket)
         
         return "stream"
         

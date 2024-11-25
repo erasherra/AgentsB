@@ -2,7 +2,7 @@ from embedchain import App
 
 
 class RAGAgent:
-    def __init__(self, node, model_manager=None):
+    def __init__(self, node, model_manager=None, stream=False):
         self.id = node["id"]
         self.label = node["assigned"]["label"]
         self.custom_name = node["assigned"]["customName"]
@@ -15,7 +15,7 @@ class RAGAgent:
 
         self.embedchain_config = model_manager.select_rag_config(self.llm.get_model_type(), self.llm.get_model(), self.system_prompt, self.llm.get_api_key(), stream)
         
-            
+        print("asd " , self.embedchain_config)    
         bot = App.from_config(config=self.embedchain_config)
 
         for item in self.sources:
@@ -30,7 +30,7 @@ class RAGAgent:
         answer, sources = self.bot.query(input_data, citations=True)
         if answer is not None:
             response = f"""
-            # {self.label}:
+            #{self.label}:
 
             {answer}
             """
@@ -41,10 +41,22 @@ class RAGAgent:
     async def process_stream(self, input_data, websocket=None):
         
         if websocket:
-            answer, sources = await self.bot.query(input_data, citations=True)
+
+            answer = ""
+            header = f"""
+            {self.label}:
+
+            """
+            await websocket.send_text(header)
+            for chunk in self.bot.query(input_data, citations=False):
+                print(chunk, end="|", flush=True)
+                await websocket.send_text(chunk)
+                answer += chunk
+
+            await websocket.send_text("$$END$$")
             if answer is not None:
                 response = f"""
-                # {self.label}:
+                #{self.label}:
 
                 {answer}
                 """

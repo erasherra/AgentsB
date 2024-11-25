@@ -26,13 +26,15 @@ class MultiAgentSystem:
 
         #TODO
         debug_mode = False
+
+        stream_switch = False
         
         self.agents = []
         for node in self.setup["nodes"]:
             if node["assigned"]["customType"] == "AGENT":
                 agent = LLMAgent(node, model_manager)
             elif node["assigned"]["customType"] == "RAG":
-                agent = RAGAgent(node, model_manager)
+                agent = RAGAgent(node, model_manager, stream_switch)
             else:
                 raise ValueError(f"Unsupported custom type: {node['customType']}")
             self.agents.append(agent)
@@ -90,6 +92,7 @@ class MultiAgentSystem:
         return input_data, memory
 
     # Streaming
+    # TODO fuse this function with process_input
     async def process_input_stream(self, input_data, websocket):
         # Initialize a set to keep track of visited nodes and an empty queue for nodes to be processed
         visited = set()
@@ -171,5 +174,51 @@ class MultiAgentSystem:
                     raise ValueError(f"Unsupported custom type: {node['customType']}")
                 return
         print(f"No agent found with ID {node_id}.")
+
+    def process_input_with_flexible_structure(self, input_data):
+        # Step 1: Initialize memory and dependency tracking
+        memory = {}
+        in_degree = {node["id"]: 0 for node in self.setup["nodes"]}  # Track dependencies
+
+        # Map edges to build the graph structure
+        adjacency_list = {node["id"]: [] for node in self.setup["nodes"]}
+        for edge in self.setup["edges"]:
+            for target in edge["target"]:
+                adjacency_list[edge["source"]].append(target)
+                in_degree[target] += 1
+
+        # Step 2: Begin processing using nodes with no dependencies (in_degree = 0)
+        # Here, using the queue for nodes ready to be processed
+        node_queue = [node_id for node_id, degree in in_degree.items() if degree == 0]
+        initial_inputs = {node_id: input_data for node_id in node_queue}
+
+        while node_queue:
+            current_node_id = node_queue.pop(0)
+            current_input = initial_inputs.get(current_node_id, "")
+
+            # Find and execute the agent associated with the current node
+            current_node = next(node for node in self.setup["nodes"] if node["id"] == current_node_id)
+            current_agent = next(agent for agent in self.agents if agent.id == current_node_id)
+            current_output = current_agent.process_input(current_input)
+
+            # Store output
+            memory[current_node_id] = current_output
+            print(f"Processed Node {current_node_id}, Output: {current_output}")
+
+            # Reduce in_degree of all connected nodes and append new ready nodes
+            for target_node_id in adjacency_list[current_node_id]:
+                if in_degree[target_node_id] > 0:
+                    in_degree[target_node_id] -= 1
+                    if in_degree[target_node_id] == 0:
+                        node_queue.append(target_node_id)
+
+                    # Prepare inputs for the target node
+                    if target_node_id not in initial_inputs:
+                        initial_inputs[target_node_id] = ""
+                    initial_inputs[target_node_id] += current_output  # Append the current output
+
+        # Assume the final node's output is the desired result
+        final_node_id = self.setup["nodes"][-1]["id"]  # It's a heuristic, can be replaced with an explicit goal node
+        return memory.get(final_node_id, ""), memory
         
                 

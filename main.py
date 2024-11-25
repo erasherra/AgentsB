@@ -12,6 +12,8 @@ from project.llms.model_manager import ModelManager
 from project.llms.gpt import GPT
 from project.llms.ollama import Ollama
 
+import os
+
 app = FastAPI()
 
 origins = [
@@ -38,7 +40,9 @@ def initialize_model_manager():
     for model in models:
         if model["name"] == "OLLAMA":
             model_manager.add_model("OLLAMA", Ollama(api_key="", model=model["model"]))
-        elif model["name"] == "OpenAI":
+        elif model["name"] == "GPT":
+            # Fix embedchain bug with better workaround
+            os.environ["OPENAI_API_KEY"] = model["api_key"]
             model_manager.add_model("GPT", GPT(api_key=model["api_key"], model=model["model"]))
     
 def initialize_setup():
@@ -94,6 +98,17 @@ async def process_input(request: Request) -> None:
     return {"input_data": input_data, "memory": memory}
 
 
+# In work
+@app.post("/v2/process")
+async def process_input(request: Request) -> None:
+    data = await request.json()
+    query = data["query"]
+    #if MAS is None:
+    #    initialize_setup()
+    input_data, memory = MAS.process_input_with_flexible_structure(query)
+    return {"input_data": input_data, "memory": memory}
+
+
 @app.put("/modify/{node_id}")
 def modify_agent(node_id: str, node_data: dict) -> None:
     if MAS is None:
@@ -113,12 +128,15 @@ def get_models():
 async def websocket_endpoint(websocket: WebSocket):
     await websocket.accept()
     
+    exec_switch = True
     while True:
-        input_data = await websocket.receive_text()
-        print("ASD ", input_data)
-        await MAS.process_input_stream(input_data, websocket)
-        #await websocket.send_text(f"Message text was: {data}")
-
+        if exec_switch:
+            exec_switch = False
+            input_data = await websocket.receive_text()
+            print("ASD ", input_data)
+            await MAS.process_input_stream(input_data, websocket)
+            #await websocket.send_text(f"Message text was: {data}")
+            exec_switch = True
 
 if __name__ == "__main__":
     initialize_setup()

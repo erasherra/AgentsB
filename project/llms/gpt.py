@@ -44,6 +44,7 @@ class GPT:
         return ""
     
     async def stream(self, 
+             label,   
              prompt, 
              system_prompt="""Let's think step by step. 
              
@@ -75,11 +76,19 @@ class GPT:
         chain = prompt_template | model
         
         response = ""
+
+        header = f"""
+        {label}:
+
+        """
+        await websocket.send_text(header)
         for chunk in chain.stream({"question": prompt}):
             print(chunk.content, end="|", flush=True)
             await websocket.send_text(chunk.content)
             response += chunk.content
-            
+        
+        await websocket.send_text("$$END$$")
+
         if response is not None:
             return response
         

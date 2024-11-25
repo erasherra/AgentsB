@@ -36,7 +36,8 @@ class Ollama:
         
         return ""
     
-    async def stream(self, 
+    async def stream(self,
+             label, 
              prompt, 
              system_prompt="""Let's think step by step. 
              
@@ -58,10 +59,18 @@ class Ollama:
         chain = prompt_template | model
         
         response = ""
+
+        header = f"""
+        {label}:
+
+        """
+        await websocket.send_text(header)
         for chunk in chain.stream({"question": prompt}):
             print(chunk, end="|", flush=True)
             await websocket.send_text(chunk)
             response += chunk
+
+        await websocket.send_text("$$END$$")
 
         if response is not None:
             return response
