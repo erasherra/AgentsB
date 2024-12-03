@@ -21,7 +21,7 @@ def validate_process_json(process_json):
             return False
 
         custom_config = assigned.get("customConfig", {})
-        if ("system_prompt" not in custom_config and "sources" not in custom_config) or (len(custom_config) > 2):
+        if ("system_prompt" not in custom_config and "sources" not in custom_config) or (len(custom_config) > 3):
             print(f"Error: Node {i} 'assigned' dictionary 'customConfig' has invalid keys at path {custom_config}.")
             return False
 
@@ -61,7 +61,7 @@ def validate_node(node):
         return False
 
     custom_config = assigned.get("customConfig", {})
-    if ("system_prompt" not in custom_config and "sources" not in custom_config) or (len(custom_config) > 2):
+    if ("system_prompt" not in custom_config and "sources" not in custom_config) or (len(custom_config) > 3):
         print(f"Error: Node 'assigned' dictionary 'customConfig' has invalid keys at path {custom_config}.")
         return False
 

@@ -80,7 +80,7 @@ async def init_multi_agent_system(request: Request) -> None:
     print("/init POST", request)
     initialize_model_manager()
     data = await request.json()
-    
+    print(data)
     if not validate_process_json(data):
         return {"message": "Invalid *.json file."}
     global MAS 
@@ -100,7 +100,7 @@ async def process_input(request: Request) -> None:
 
 # In work
 @app.post("/v2/process")
-async def process_input(request: Request) -> None:
+async def process_input_V2(request: Request) -> None:
     data = await request.json()
     query = data["query"]
     #if MAS is None:

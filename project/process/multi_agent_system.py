@@ -1,6 +1,7 @@
 from project.llms.model_manager import ModelManager
 from project.agents.simple_agent import LLMAgent
 from project.agents.rag_agent import RAGAgent
+import json
 """
 Represents a multi-agent system. This class is responsible for initializing
 the agents and processing input data.
@@ -179,6 +180,31 @@ class MultiAgentSystem:
         # Step 1: Initialize memory and dependency tracking
         memory = {}
         in_degree = {node["id"]: 0 for node in self.setup["nodes"]}  # Track dependencies
+
+        # Step 1.5: Check if edges are empty
+        if not self.setup["edges"]:
+            accumulated_output = ""  # Initialize an empty string to accumulate results
+
+            # Step 2: Iterate over all nodes
+            for node in self.setup["nodes"]:
+                # Step 3: Find the corresponding agent
+                agent = next(agent for agent in self.agents if agent.id == node["id"])
+
+                # Process input for the current node
+                current_output = agent.process_input(input_data)
+
+                # Step 4: Accumulate the output
+                if isinstance(current_output, dict):
+                    # Convert to string
+                    current_output_str = json.dumps(current_output)
+                else:
+                    # Ensure it's a string
+                    current_output_str = str(current_output)
+                
+                accumulated_output += current_output_str + " "
+
+            # Step 5: Return the combined output
+            return accumulated_output.strip()  # Strip any extra whitespace
 
         # Map edges to build the graph structure
         adjacency_list = {node["id"]: [] for node in self.setup["nodes"]}
