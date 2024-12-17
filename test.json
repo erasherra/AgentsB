@@ -1,10 +1,10 @@
 
 
 #Nodes 
-[{"id":"1","type":"customNode","data":{"assigned":{"label":"asd","customName":"asd","customType":"AGENT","customConfig":{"system_prompt":"asd"}},"functions":{},"llm":{"selected":"OLLAMA"}},"position":{"x":319,"y":122},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
-{"id":"2","type":"customNode","data":{"assigned":{"label":"asd2","customName":"asd2","customType":"AGENT","customConfig":{"system_prompt":"asd2"}},"functions":{},"llm":{"selected":"OLLAMA"}},"position":{"x":599,"y":52},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
-{"id":"3","type":"customNode","data":{"assigned":{"label":"asd3","customName":"asd3","customType":"RAG","customConfig":{"system_prompt":"asd3","sources":[{"source":"asd","type":"TXT"},{"source":"asd","type":"PDF"},{"source":"asd","type":"URL"},{"source":"","type":"TXT"}]}},"functions":{},"llm":{"selected":"GPT"}},"position":{"x":891,"y":119},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
-{"id":"4","type":"customNode","data":{"assigned":{"label":"asd2.5","customName":"asd2.5","customType":"AGENT","customConfig":{"system_prompt":"asd2.5"}},"functions":{},"llm":{"selected":"GPT"}},"position":{"x":600,"y":178},"measured":{"width":200,"height":50},"selected":true,"dragging":false}]
+[{"id":"1","type":"customNode","data":{"assigned":{"label":"asd","customName":"asd","customType":"AGENT","customConfig":{"system_prompt":"asd"}},"functions":{},"llm":{"selected":"Ollama"}},"position":{"x":319,"y":122},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
+{"id":"2","type":"customNode","data":{"assigned":{"label":"asd2","customName":"asd2","customType":"AGENT","customConfig":{"system_prompt":"asd2"}},"functions":{},"llm":{"selected":"Ollama"}},"position":{"x":599,"y":52},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
+{"id":"3","type":"customNode","data":{"assigned":{"label":"asd3","customName":"asd3","customType":"RAG","customConfig":{"system_prompt":"asd3","sources":[{"source":"asd","type":"TXT"},{"source":"asd","type":"PDF"},{"source":"asd","type":"URL"},{"source":"","type":"TXT"}]}},"functions":{},"llm":{"selected":"OpenAI"}},"position":{"x":891,"y":119},"measured":{"width":200,"height":50},"selected":false,"dragging":false},
+{"id":"4","type":"customNode","data":{"assigned":{"label":"asd2.5","customName":"asd2.5","customType":"AGENT","customConfig":{"system_prompt":"asd2.5"}},"functions":{},"llm":{"selected":"OpenAI"}},"position":{"x":600,"y":178},"measured":{"width":200,"height":50},"selected":true,"dragging":false}]
 
 #Edges 
 [{"source":"1","target":"2","id":"xy-edge__1-2"},
@@ -15,10 +15,10 @@
 {
   "name": "Test",
   "nodes": [
-      {"id": "1", "assigned": {"label": "assistant", "customName": "assistant", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to form a clear description of the given question."}}, "llm": {"selected": "OLLAMA"}},
-      {"id": "2", "assigned": {"label": "negative-expert", "customName": "negative-expert", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to give few reasons why not to invest to the given asset."}}, "llm": {"selected": "OLLAMA"}},
-      {"id": "3", "assigned": {"label": "analyst", "customName": "analyst", "customType": "RAG", "customConfig": {"system_prompt": "Your job is to analyze the final answer based on the given arguments and context.", "sources": [{"source": "C:/Users/amiri/Documents/projektit/aalto/special/agents-back/documents/text/dummy.txt", "type": "text_file"}, {"source": "https://research-api.cbs.dk/ws/portalfiles/portal/59784604/439940_Masterthesis_OnurOezek.pdf", "type": "pdf_file"}, {"source": "https://www.investopedia.com/tech/question-why-should-anyone-invest-crypto/", "type": "web_page"}, {"source": "Investing is good as long one diversifies investment targets", "type": "text"}]}}, "llm": {"selected": "GPT"}},
-      {"id": "4", "assigned": {"label": "positive-expert", "customName": "positive-expert", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to give few reasons why one should invest to the given asset."}}, "llm": {"selected": "GPT"}}
+      {"id": "1", "assigned": {"label": "assistant", "customName": "assistant", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to form a clear description of the given question."}}, "llm": {"selected": "Ollama"}},
+      {"id": "2", "assigned": {"label": "negative-expert", "customName": "negative-expert", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to give few reasons why not to invest to the given asset."}}, "llm": {"selected": "Ollama"}},
+      {"id": "3", "assigned": {"label": "analyst", "customName": "analyst", "customType": "RAG", "customConfig": {"system_prompt": "Your job is to analyze the final answer based on the given arguments and context.", "sources": [{"source": "C:/Users/amiri/Documents/projektit/aalto/special/agents-back/documents/text/dummy.txt", "type": "text_file"}, {"source": "https://research-api.cbs.dk/ws/portalfiles/portal/59784604/439940_Masterthesis_OnurOezek.pdf", "type": "pdf_file"}, {"source": "https://www.investopedia.com/tech/question-why-should-anyone-invest-crypto/", "type": "web_page"}, {"source": "Investing is good as long one diversifies investment targets", "type": "text"}]}}, "llm": {"selected": "OpenAI"}},
+      {"id": "4", "assigned": {"label": "positive-expert", "customName": "positive-expert", "customType": "AGENT", "customConfig": {"system_prompt": "Your job is to give few reasons why one should invest to the given asset."}}, "llm": {"selected": "OpenAI"}}
     ],
   "edges": [
     {"source": "1", "target": "2", "id": "xy-edge__1-2"},

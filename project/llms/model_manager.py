@@ -13,7 +13,7 @@ class ModelManager:
     def select_rag_config(self, model_type, model, system_prompt, api_key=None, stream=False):
         
         llm_config = None
-        if model_type == "OLLAMA":
+        if model_type == "Ollama":
             llm_config = {
                 "llm": {
                   "provider": "ollama",
@@ -24,9 +24,9 @@ class ModelManager:
                     "prompt": "\n$context\n\n$query\n\n",
                     "system_prompt": system_prompt
                   }
-                }
+                },
             }
-        elif model_type == "GPT":
+        elif model_type == "OpenAI":
             llm_config = {
                 "llm": {
                     "provider": "openai",
@@ -39,8 +39,9 @@ class ModelManager:
                       "prompt": "\n$context\n\n$query\n\n",
                       "system_prompt": system_prompt,
                       "api_key": api_key
-                    }
-                }
+                    },
+                 
+                },
             }
             
         return llm_config  # output

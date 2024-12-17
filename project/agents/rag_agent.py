@@ -11,7 +11,7 @@ class RAGAgent:
         self.sources = self.custom_config["sources"]#node["assigned"]["customConfig"]["sources"]#[source["source"] for source in self.custom_config["sources"]]
         self.system_prompt = self.custom_config["system_prompt"]
         self.llm = model_manager.get_model(node["llm"]["selected"])
-
+        
         if "evaluate" in self.custom_config and self.custom_config["evaluate"] != None:
             self.evaluate = self.custom_config["evaluate"]
         else:
@@ -28,7 +28,15 @@ class RAGAgent:
 
         self.bot = bot
         
-   
+        self.input = ""
+        self.output = ""
+        
+    def set_input(self, input_data):
+        self.input += f"""
+        {input_data}
+
+        """
+        
     def process(self, input_data):
         
         answer, sources = self.bot.query(input_data, citations=True)
@@ -42,10 +50,8 @@ class RAGAgent:
         
         return ""
     
-    async def process_stream(self, input_data, websocket=None):
-        
-
-
+    async def process_stream(self, websocket=None):
+        input_data = self.input
         if websocket:
 
             if self.evaluate:
@@ -75,10 +81,13 @@ class RAGAgent:
         
         return ""
     
-    def process_input(self, input_data):
+    def process_input(self):
         # TO DO: implement RAG agent logic
         # For now, just return the input data as is
-        #return input_data + " <start> " +  self.id + self.custom_type + " </end> "# output
+        input_data = self.input
+        debug = False
+        if debug:
+            return input_data + " <start> " +  self.id + self.custom_type + " </end> "# output
         if self.evaluate:
             return self.evaluate_input(input_data)
         
@@ -92,6 +101,7 @@ class RAGAgent:
         #}
         answer = self.bot.evaluate(input_data)
         answer = self.sanitize_data(answer)
+        answer = str(answer)
         print("Evaluation: ", answer)
         return answer
 

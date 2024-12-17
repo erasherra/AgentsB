@@ -2,7 +2,7 @@ import os
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI
 
-class GPT:
+class OpenAI:
     def __init__(self, api_key="empty", model="gpt-3.5-turbo"):
         self.api_key = api_key
         self.model = model
@@ -101,4 +101,4 @@ class GPT:
         return self.model
     
     def get_model_type(self):
-        return "GPT"
+        return "OpenAI"

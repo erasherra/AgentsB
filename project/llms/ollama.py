@@ -29,8 +29,8 @@ class Ollama:
         chain = prompt_template | model
         response = chain.invoke({"question": prompt})
         
-        print(response)
-        print(type(response))
+        #print(response)
+        #print(type(response))
         if response is not None:
             return response
         
@@ -84,4 +84,4 @@ class Ollama:
         return self.model
     
     def get_model_type(self):
-        return "OLLAMA"
+        return "Ollama"

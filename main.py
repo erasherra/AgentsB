@@ -2,6 +2,7 @@ from typing import Union
 
 from fastapi import WebSocket, Request, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware import Middleware
 import json
 
 from config import models
@@ -9,10 +10,12 @@ from project.utils.input_validator import validate_process_json
 from project.utils.input_validator import validate_node
 from project.process.multi_agent_system import MultiAgentSystem
 from project.llms.model_manager import ModelManager
-from project.llms.gpt import GPT
+from project.llms.gpt import OpenAI
 from project.llms.ollama import Ollama
 
 import os
+
+
 
 app = FastAPI()
 
@@ -38,12 +41,12 @@ def initialize_model_manager():
     model_manager = ModelManager()
     
     for model in models:
-        if model["name"] == "OLLAMA":
-            model_manager.add_model("OLLAMA", Ollama(api_key="", model=model["model"]))
-        elif model["name"] == "GPT":
+        if model["name"] == "Ollama":
+            model_manager.add_model("Ollama", Ollama(api_key="", model=model["model"]))
+        elif model["name"] == "OpenAI":
             # Fix embedchain bug with better workaround
             os.environ["OPENAI_API_KEY"] = model["api_key"]
-            model_manager.add_model("GPT", GPT(api_key=model["api_key"], model=model["model"]))
+            model_manager.add_model("OpenAI", OpenAI(api_key=model["api_key"], model=model["model"]))
     
 def initialize_setup():
     
@@ -105,7 +108,7 @@ async def process_input_V2(request: Request) -> None:
     query = data["query"]
     #if MAS is None:
     #    initialize_setup()
-    input_data, memory = MAS.process_input_with_flexible_structure(query)
+    input_data, memory = MAS.process_input(query)
     return {"input_data": input_data, "memory": memory}
 
 

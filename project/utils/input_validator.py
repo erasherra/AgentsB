@@ -8,37 +8,51 @@ def validate_process_json(process_json):
 
     for i, node in enumerate(nodes):
         # Check if each node has required keys
-        if "id" not in node or "assigned" not in node or "llm" not in node:
+        if "id" not in node:
             print(f"Error: Node {i} does not have required keys at path {node}.")
             return False
 
-        assigned = node["assigned"]
-        llm = node["llm"]
+        if node["id"] != "i" and node["id"] != "o": 
+            
+            if "assigned" not in node or "llm" not in node:
+                print(f"Error: Node {i} does not have required keys at path {node}.")
+                return False
 
-        # Check if the assigned node has required keys
-        if "label" not in assigned or "customName" not in assigned or "customType" not in assigned:
-            print(f"Error: Node {i} 'assigned' dictionary does not have required keys at path {assigned}.")
-            return False
+            assigned = node["assigned"]
+            llm = node["llm"]
 
-        custom_config = assigned.get("customConfig", {})
-        if ("system_prompt" not in custom_config and "sources" not in custom_config) or (len(custom_config) > 3):
-            print(f"Error: Node {i} 'assigned' dictionary 'customConfig' has invalid keys at path {custom_config}.")
-            return False
+            # Check if the assigned node has required keys
+            if "label" not in assigned or "customName" not in assigned or "customType" not in assigned:
+                print(f"Error: Node {i} 'assigned' dictionary does not have required keys at path {assigned}.")
+                return False
 
-        # Check if the llm node has required keys
-        if "selected" not in llm:
-            print(f"Error: Node {i} 'llm' dictionary does not have required keys at path {llm}.")
-            return False
+            custom_config = assigned.get("customConfig", {})
+            if assigned["customType"] == "RAG":
+                
+                if ("system_prompt" not in custom_config and "sources" not in custom_config):
+                    print(f"Error: Node {i} 'assigned' dictionary 'customConfig' has invalid keys at path {custom_config}.")
+                    return False
+            elif assigned["customType"] == "AGENT":
+                
+                if ("system_prompt" not in custom_config):
+                    print(f"Error: Node {i} 'assigned' dictionary 'customConfig' has invalid keys at path {custom_config}.")
+                    return False
 
+            # Check if the llm node has required keys
+            if "selected" not in llm:
+                print(f"Error: Node {i} 'llm' dictionary does not have required keys at path {llm}.")
+                return False
+        
     edges = process_json["edges"]
 
-    #for i, edge in enumerate(edges):
-    #    # Check if each edge has required keys
-    #    if "source" not in edge or "target" not in edge:
-    #        print(f"Error: Edge {i} does not have required keys at path {edge}.")
-    #        return False
+    for i, edge in enumerate(edges):
+        # Check if each edge has required keys
+        if "source" not in edge or "target" not in edge:
+            print(f"Error: Edge {i} does not have required keys at path {edge}.")
+            return False
 
     return True
+
 
 def validate_node(node):
     """
